@@ -9,7 +9,7 @@ The implementations of both the bistable recurrent cell and its neurmodulated ve
 
 The goal of this task is to correctly predict the number at the start of a sequence of a certain length. 
 
-This task is reproduced from the paper - 2 layer model with 100 units each, trained on datasets with increasing sequence lengths - 5, 100, 300. 
+This task is reproduced from the paper - 2 layer model with 100 units each, trained on datasets with increasing sequence lengths - 5, 100, 300. The plot is obtained by taking a moving average of the training loss per gradient iteration with window size = 100 for lengths 100 and 300, and window size 20 for length 5. 
 
 The results from Copy-First-Input task show trends similar to that in the paper, thus confirming their findings. It should, however, be noted that the absolute losses are higher than reported in the paper. This is mostly due to the training and testing sizes being much smaller, and no hyperparameter tuning being done. 
 
@@ -21,7 +21,7 @@ Additional testing on Binary Addition was done to test the capabilities of these
 
 Both single layer and 2 layer models, with constant hidden units 100, are evaluated based on the accuracy of their predictions.
 
-The results from this task prove the usefulness of both the nBRC and BRC layers which consistently perform better than both the LSTM and GRU. Moreover, it is interesting to note the potential of nBRC in the binary addition task which is consistent around near perfect accuracy upto sequence length 60. 
+The results from this task prove the usefulness of both the nBRC and BRC layers which consistently perform better than both the LSTM and GRU. Moreover, it is interesting to note the potential of nBRC in the binary addition task which is consistent around near perfect accuracy upto sequence length 60. The plots are obtained by averaging the results over 5 runs of the experiment and highlighting the standard error of the average.
 
 ![copy-first-input](https://github.com/niklexical/brc_pytorch/raw/master/results/binary_addition_1layer.png)
 
