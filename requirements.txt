@@ -1,0 +1,12 @@
+numpy>=1.14.3
+scipy>=1.3.1
+torch>=1.3.0
+pandas>=0.24.2,<1.0
+upfp==0.0.5
+scikit-learn>=0.22.1
+matplotlib>=3.1.1
+seaborn>=0.9.0
+jupyter==1.0.0
+faerun==0.3.7
+tqdm>=4.31
+pytest==5.4.2
