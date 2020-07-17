@@ -1,7 +1,7 @@
 # brc_pytorch
 Pytorch implementation of bistable recurrent cell with baseline comparisons.
 
-This repository contains the Pytorch implementation of the paper ["A bio-inspired bistable recurrent cell allows for long-lasting memory"] (https://arxiv.org/abs/2006.05252).
+This repository contains the Pytorch implementation of the paper ["A bio-inspired bistable recurrent cell allows for long-lasting memory".](https://arxiv.org/abs/2006.05252)
 
 The implementations of both the bistable recurrent cell and its neurmodulated version are tested on 2 tasks - Copy-First-Input (Benchmark 1 from https://arxiv.org/abs/2006.05252) and Binary Addition. Their performances are compared with that of the LSTM and GRU cells. 
 
