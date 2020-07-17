@@ -1,6 +1,7 @@
+from typing import Tuple
+
 import numpy as np
 import torch
-from typing import Tuple
 from torch.utils.data import Dataset
 
 
@@ -20,7 +21,8 @@ class BinaryAddition(Dataset):
             max_sequence_length (int): Upper limit on length of the sequence.
             min_sequence_length (int): Lower limit length of the sequence.
             mode (string): 'single' generates a dataset for the given
-                sequence length. 'mixed' generates a dataset containing all sequence lengths.
+                sequence length. 'mixed' generates a dataset containing all
+                sequence lengths.
         """
 
         self.sample_size = sample_size
@@ -46,7 +48,7 @@ class BinaryAddition(Dataset):
 
         Returns:
             Tuple: The input numbers and their corresponding sums are returned
-                in binary integer form as a tuple. 
+                in binary integer form as a tuple.
         """
 
         if self.mode == 'single':

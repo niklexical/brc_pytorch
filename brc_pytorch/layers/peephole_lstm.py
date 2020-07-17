@@ -110,9 +110,13 @@ class PeepholeLSTMCell(nn.Module):
 
         cell_state = forget_prob * cell_state + input_prob * candidates
 
-        linear_output = (linear_xh[:, self.hidden_size * 3:self.hidden_size * 4]
-            + torch.matmul(cell_state,
-            self.weights_c[:, self.hidden_size * 2:self.hidden_size * 3]))  #yapf: disable
+        linear_output = (
+            linear_xh[:, self.hidden_size * 3:self.hidden_size * 4] +
+            torch.matmul(
+                cell_state,
+                self.weights_c[:, self.hidden_size * 2:self.hidden_size * 3]
+            )
+        )
 
         output_gate = torch.sigmoid(linear_output)
 
