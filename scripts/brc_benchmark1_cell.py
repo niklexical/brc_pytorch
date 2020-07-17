@@ -1,3 +1,4 @@
+"""Cell wise implementation of copy-first-input task"""
 import os
 import sys
 import argparse
@@ -44,7 +45,7 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 
 def main(cell_name: str, model_path: str, results_path: str) -> None:
-    """Selects item from tuple/list and returns it.
+    """Executes copy-first-input task for specified cell.
 
     Args:
         cell_name (string): Name of the recurrent cell to be used. One of
