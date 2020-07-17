@@ -4,8 +4,8 @@ import pytest
 import torch
 import torch.nn as nn
 from torch.utils.data import DataLoader
-from paccmann_sets.utils.layers.multilayer_rnnbase import MultiLayerBase
-from paccmann_sets.datasets.BRCDataset import BRCDataset
+from brc_pytorch.utils.layers.multilayer_rnnbase import MultiLayerBase
+from brc_pytorch.datasets.BRCDataset import BRCDataset
 
 
 class SelectItem(nn.Module):
