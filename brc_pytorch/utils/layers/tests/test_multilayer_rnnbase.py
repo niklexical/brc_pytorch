@@ -143,7 +143,7 @@ def test_multilayer_rnn(generate_dataset):
 
     assert numweights_model == numweights_torch
     assert len(param_groups_model) == 10
-    assert len(param_groups_torch) == 10
+    assert len(param_groups_torch) == len(param_groups_model)
     assert x_batch.size() == torch.Size([100, 10, 1])
     assert torch.allclose(train_loss, train_loss_torch)
     assert torch.allclose(my_test_loss, torch_test_loss)
