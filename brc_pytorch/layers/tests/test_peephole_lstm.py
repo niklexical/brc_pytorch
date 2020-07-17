@@ -1,7 +1,11 @@
 """Testing peephole_lstm"""
 import torch
+<<<<<<< HEAD:brc_pytorch/utils/layers/tests/test_peephole_lstm.py
+from brc_pytorch.utils.layers.peephole_lstm import PeepholeLSTMCell
+=======
 
 from brc_pytorch.layers.peephole_lstm import PeepholeLSTMCell
+>>>>>>> 72ffb878df0c596efa16a9f40f96a60336225ab9:brc_pytorch/layers/tests/test_peephole_lstm.py
 
 
 def test_lstm_cell():

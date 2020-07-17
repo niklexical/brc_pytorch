@@ -78,9 +78,7 @@ class NeuromodulatedBistableRecurrentCell(nn.Module):
 
         return output_hidden_state
 
-    def get_initial_state(
-        self, inputs=None, batch_size=None, dtype=torch.float32
-    ):
+    def get_initial_state(self, batch_size=None, dtype=torch.float32):
         """Intialise hidden states.
 
         Args:
