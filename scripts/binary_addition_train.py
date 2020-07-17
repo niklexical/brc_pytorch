@@ -29,7 +29,7 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 
 def main(model_path: str, results_path: str) -> None:
-    """Execute binary addition task for each cell sequentially.
+    """Executes binary addition task for each cell sequentially.
 
     Args:
         model_path (string): Path where the best model should be saved.
