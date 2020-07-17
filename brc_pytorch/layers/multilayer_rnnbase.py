@@ -18,7 +18,8 @@ class MultiLayerBase(nn.Module):
         """Constructor.
 
         Args:
-            mode (string): Type of cell to be used in RNN.
+            mode (string): Type of cell to be used in RNN. Options are:
+                ['GRU', 'LSTM', 'RNN', 'BRC', 'nBRC'].
             cell (list): List of cells to be used in the RNN layers.
             hidden_sizes (int): Hidden sizes for each cell.
             device (str): Whether to run model on GPU or CPU. Defaults to CPU.

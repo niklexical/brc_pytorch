@@ -1,19 +1,21 @@
-import os
-import sys
 import argparse
 import logging
+import os
+import sys
 from typing import Tuple
+
+import matplotlib.pyplot as plt
 import numpy as np
+import seaborn as sns
 import torch
 import torch.nn as nn
 from torch.utils.data import DataLoader
-import seaborn as sns
-import matplotlib.pyplot as plt
-from brc_pytorch.utils.layers.neuromodulated_brc_layer import NeuromodulatedBistableRecurrentCellLayer
-from brc_pytorch.utils.layers.brc_layer import BistableRecurrentCellLayer
-from brc_pytorch.utils.layers.multilayer_rnnbase import MultiLayerBase
+
 from brc_pytorch.datasets.BRCDataset import BRCDataset
-from brc_pytorch.utils.layers.select_item import SelectItem
+from brc_pytorch.layers import (
+    BistableRecurrentCell, MultiLayerBase, NeuromodulatedBistableRecurrentCell,
+    SelectItem
+)
 
 
 def generate_sample(n: int) -> Tuple:
@@ -82,9 +84,8 @@ def main(model_path: str, results_path: str) -> None:
 
         for name, cell in zip(
             ["LSTM", "GRU", "nBRC", "BRC"], [
-                nn.LSTMCell, nn.GRUCell,
-                NeuromodulatedBistableRecurrentCellLayer,
-                BistableRecurrentCellLayer
+                nn.LSTMCell, nn.GRUCell, NeuromodulatedBistableRecurrentCell,
+                BistableRecurrentCell
             ]
         ):
             c += 1

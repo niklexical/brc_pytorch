@@ -1,20 +1,23 @@
 """Cell wise implementation of copy-first-input task"""
-import os
-import sys
 import argparse
 import logging
+import os
+import sys
 from typing import Tuple
+
+import matplotlib.pyplot as plt
 import numpy as np
+import seaborn as sns
 import torch
 import torch.nn as nn
 from torch.utils.data import DataLoader
-import seaborn as sns
-import matplotlib.pyplot as plt
-from brc_pytorch.utils.layers.neuromodulated_brc_layer import NeuromodulatedBistableRecurrentCellLayer
-from brc_pytorch.utils.layers.brc_layer import BistableRecurrentCellLayer
-from brc_pytorch.utils.layers.multilayer_rnnbase import MultiLayerBase
+
 from brc_pytorch.datasets.BRCDataset import BRCDataset
-from brc_pytorch.utils.layers.select_item import SelectItem
+from brc_pytorch.layers.brc_layer import BistableRecurrentCell
+from brc_pytorch.layers.multilayer_rnnbase import MultiLayerBase
+from brc_pytorch.layers.neuromodulated_brc_layer import \
+    NeuromodulatedBistableRecurrentCell
+from brc_pytorch.layers.select_item import SelectItem
 
 
 def generate_sample(n: int) -> Tuple:
@@ -83,8 +86,8 @@ def main(cell_name: str, model_path: str, results_path: str) -> None:
     colours = sns.color_palette("husl", 5)
 
     cell_modules = [
-        nn.LSTMCell, nn.GRUCell, NeuromodulatedBistableRecurrentCellLayer,
-        BistableRecurrentCellLayer
+        nn.LSTMCell, nn.GRUCell, NeuromodulatedBistableRecurrentCell,
+        BistableRecurrentCell
     ]
 
     cell_idx = ["LSTM", "GRU", "nBRC", "BRC"].index(cell_name)

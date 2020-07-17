@@ -1,18 +1,20 @@
-import os
-import sys
 import argparse
 import logging
+import os
+import sys
+
+import matplotlib.pyplot as plt
 import numpy as np
+import seaborn as sns
 import torch
 import torch.nn as nn
 from torch.utils.data import DataLoader
-import seaborn as sns
-import matplotlib.pyplot as plt
-from brc_pytorch.utils.layers.neuromodulated_brc_layer import NeuromodulatedBistableRecurrentCellLayer
-from brc_pytorch.utils.layers.brc_layer import BistableRecurrentCellLayer
-from brc_pytorch.utils.layers.multilayer_rnnbase import MultiLayerBase
-from brc_pytorch.datasets.binary_addition import BinaryAddition
-from brc_pytorch.utils.layers.select_item import SelectItem
+
+from brc_pytorch.datasets import BinaryAddition
+from brc_pytorch.layers import (
+    BistableRecurrentCell, MultiLayerBase, NeuromodulatedBistableRecurrentCell,
+    SelectItem
+)
 
 parser = argparse.ArgumentParser()
 parser.add_argument(
@@ -75,8 +77,8 @@ def main(model_path: str, results_path: str) -> None:
     c = 0
     for name, cell in zip(
         ["LSTM", "GRU", "nBRC", "BRC"], [
-            nn.LSTMCell, nn.GRUCell, NeuromodulatedBistableRecurrentCellLayer,
-            BistableRecurrentCellLayer
+            nn.LSTMCell, nn.GRUCell, NeuromodulatedBistableRecurrentCell,
+            BistableRecurrentCell
         ]
     ):
         save_here = os.path.join(model_path, f'{name}_binadd')

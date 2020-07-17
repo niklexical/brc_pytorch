@@ -70,7 +70,7 @@ def test_multilayer_rnn(generate_dataset):
     """Tests multilayer functionality for cells that output hidden state only."""
 
     input_size = 1
-    hidden_sizes = [input_size, 100, 100]
+    hidden_sizes = [input_size, 16, 16]
 
     recurrent_layers = [
         nn.GRUCell(hidden_sizes[i], hidden_sizes[i + 1])
@@ -154,7 +154,7 @@ def test_multilayer_lstm(generate_dataset):
     """Tests multilayer functionality for cells that output hidden and cell state."""
 
     input_size = 1
-    hidden_sizes = [input_size, 100, 100]
+    hidden_sizes = [input_size, 16, 16]
 
     recurrent_layers = [
         nn.LSTMCell(hidden_sizes[i], hidden_sizes[i + 1])
