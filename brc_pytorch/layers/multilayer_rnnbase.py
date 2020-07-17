@@ -1,7 +1,7 @@
+from typing import Tuple
+
 import torch
 import torch.nn as nn
-from torch.autograd import Variable
-from typing import Tuple
 
 
 class MultiLayerBase(nn.Module):
@@ -20,7 +20,7 @@ class MultiLayerBase(nn.Module):
         Args:
             mode (string): Type of cell to be used in RNN.
             cell (list): List of cells to be used in the RNN layers.
-            hidden_size(int): Hidden sizes for each cell.
+            hidden_sizes (int): Hidden sizes for each cell.
             device (str): Whether to run model on GPU or CPU. Defaults to CPU.
             return_sequences (bool): Return the hidden states for all
                 time steps. Defaults to False.

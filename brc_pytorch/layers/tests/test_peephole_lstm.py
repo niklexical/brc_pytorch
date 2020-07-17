@@ -1,6 +1,7 @@
 """Testing peephole_lstm"""
 import torch
-from paccmann_sets.utils.layers.peephole_lstm import PeepholeLSTMCell
+
+from brc_pytorch.layers.peephole_lstm import PeepholeLSTMCell
 
 
 def test_lstm_cell():
