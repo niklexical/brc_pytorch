@@ -1,12 +1,12 @@
 """Testing Bistable Recurrent Cell"""
-import pytest
 import numpy as np
+import pytest
 import torch
 import torch.nn as nn
 from torch.utils.data import DataLoader
-from brc_pytorch.utils.layers.brc_layer import BistableRecurrentCellLayer
-from brc_pytorch.utils.layers.multilayer_rnnbase import MultiLayerBase
-from brc_pytorch.datasets.BRCDataset import BRCDataset
+
+from brc_pytorch.datasets import BRCDataset
+from brc_pytorch.layers import BistableRecurrentCell, MultiLayerBase
 
 
 @pytest.fixture
@@ -59,7 +59,7 @@ def test_brc_cell():
 
     input_set = torch.rand((batch_size, input_size))
 
-    brc = BistableRecurrentCellLayer(input_size, hidden_size)
+    brc = BistableRecurrentCell(input_size, hidden_size)
     hidden_state = brc.get_initial_state(batch_size)
 
     hidden_state = brc(input_set, hidden_state)
@@ -82,7 +82,7 @@ def test_grad_flow(generate_dataset):
     hidden_sizes = [input_size, 100, 100]
 
     recurrent_layers = [
-        BistableRecurrentCellLayer(hidden_sizes[i], hidden_sizes[i + 1])
+        BistableRecurrentCell(hidden_sizes[i], hidden_sizes[i + 1])
         for i in range(len(hidden_sizes) - 1)
     ]
 

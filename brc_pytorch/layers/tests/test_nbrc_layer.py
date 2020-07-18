@@ -1,12 +1,14 @@
 """Testing Neuromodulated Bistable Recurrent Cell"""
-import pytest
 import numpy as np
+import pytest
 import torch
 import torch.nn as nn
 from torch.utils.data import DataLoader
-from brc_pytorch.utils.layers.neuromodulated_brc_layer import NeuromodulatedBistableRecurrentCellLayer
-from brc_pytorch.utils.layers.multilayer_rnnbase import MultiLayerBase
-from brc_pytorch.datasets.BRCDataset import BRCDataset
+
+from brc_pytorch.datasets import BRCDataset
+from brc_pytorch.layers import (
+    MultiLayerBase, NeuromodulatedBistableRecurrentCell
+)
 
 
 @pytest.fixture
@@ -59,7 +61,7 @@ def test_nbrc_cell():
 
     input_set = torch.rand((batch_size, input_size))
 
-    nbrc = NeuromodulatedBistableRecurrentCellLayer(input_size, hidden_size)
+    nbrc = NeuromodulatedBistableRecurrentCell(input_size, hidden_size)
     hidden_state = nbrc.get_initial_state(batch_size)
 
     hidden_state = nbrc(input_set, hidden_state)
@@ -82,7 +84,7 @@ def test_grad_flow(generate_dataset):
     hidden_sizes = [input_size, 100, 100]
 
     recurrent_layers = [
-        NeuromodulatedBistableRecurrentCellLayer(
+        NeuromodulatedBistableRecurrentCell(
             hidden_sizes[i], hidden_sizes[i + 1]
         ) for i in range(len(hidden_sizes) - 1)
     ]
