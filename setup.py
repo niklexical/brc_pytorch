@@ -13,6 +13,7 @@ setup(
     license='MIT',
     description=('Pytorch Implementation of BRC.'),
     long_description=long_description,
+    long_description_content_type='text/markdown',
     url='https://github.com/niklexical/brc_pytorch',
     author='Nikita Janakarajan, Jannis Born',
     author_email=('nikita.janakarajan907@gmail.com, jannis.born@gmx.de'),
