@@ -1,3 +1,6 @@
+[![Build
+Status](https://travis-ci.com/niklexical/brc_pytorch.svg?branch=master)](https://travis-ci.com/niklexical/brc_pytorch)[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+
 # brc_pytorch
 Pytorch implementation of bistable recurrent cell with baseline comparisons.
 
