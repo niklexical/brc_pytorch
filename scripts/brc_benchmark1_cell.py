@@ -12,7 +12,7 @@ import torch
 import torch.nn as nn
 from torch.utils.data import DataLoader
 
-from brc_pytorch.datasets.BRCDataset import BRCDataset
+from brc_pytorch.datasets import BRCDataset
 from brc_pytorch.layers.brc_layer import BistableRecurrentCell
 from brc_pytorch.layers.multilayer_rnnbase import MultiLayerBase
 from brc_pytorch.layers.neuromodulated_brc_layer import \
