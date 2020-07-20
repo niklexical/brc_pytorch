@@ -135,6 +135,6 @@ for proc in procs:
     proc.wait()
 ```
 
-3. Calculate the mean and standard error of mean for each `results/test*/test_acc_*.npy` file and plot.
+3. Calculate the mean and standard error of mean over the different tests for each `test_acc_*.npy` file and plot.
 
 For the 2 layer implementation, simply add another 100 to the `hidden_sizes` variable in the training file, and repeat the steps.
