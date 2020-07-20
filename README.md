@@ -67,9 +67,20 @@ The results from Copy-First-Input task show trends similar to that in the paper,
 ![copy-first-input](https://github.com/niklexical/brc_pytorch/raw/master/results/copy-first-input.png)
 
 To reproduce this task do:
-```py
+1. Change directory to the `scripts` folder. From the terminal, run the following commands:
+```sh
+# The following command creates a directory with subdirectories in the scripts folder to save the models and results.
+mkdir -p test_benchmark1/{models,results}
+# Run the training script with your python executable. The following is an example for Anaconda.
+/opt/anaconda3/envs/venv/bin/python brc_benchmark1.py test_benchmark1/models/ test_benchmark1/results/
 
 ```
+Or, if training takes a very long time, run the script cell-wise, i.e, specify cell name as an additional argument and run multiple jobs in parallell - one for each cell.
+```sh
+/opt/anaconda3/envs/venv/bin/python brc_benchmark1_cell.py nBRC test_benchmark1/models/ test_benchmark1/results/
+
+```
+2. Calculate the moving average for each `TrainLoss_AllE_*.npy` file from test_benchmark1/results/ and plot.
 
 ### Binary Addition
 
@@ -86,6 +97,44 @@ The results from this task prove the usefulness of both the nBRC and BRC layers 
 While the Copy-First-Input task highlights the performance superiority of these cells over the conventional LSTM and GRU, the Binary Addition task, which requires counting, is witness to their usefulness beyond just long-lasting memory.
 
 To reproduce this task do:
-```py
+
+1. Change directory to the `scripts` folder. From the terminal, run the following command:
+```sh
+# The following command creates a directory with subdirectories in the scripts folder to save the models and results.
+mkdir -p test_binary_addition/{models,results}/{test1,test2,test3,test4,test5}
 
 ```
+2. Create and run the following python script from the same directory. Make sure the python executable file is correct.
+```py
+import os
+import sys
+import subprocess
+
+dir_models = 'test_binary_addition/models/'
+dir_results = 'test_binary_addition/results/'
+
+modelpaths = [
+    os.path.join(dir_models,f'test{i}') for i in range(1,6)
+]
+resultpaths = [
+    os.path.join(dir_results,f'test{i}') for i in range(1,6)
+]
+
+procs = []
+for i in range(5):
+    proc = subprocess.Popen(
+        [
+            sys.executable,
+            'binary_addition_train.py',
+            modelpaths[i], resultpaths[i]
+        ]
+    )
+    procs.append(proc)
+
+for proc in procs:
+    proc.wait()
+```
+
+3. Calculate the mean and standard error of mean for each `results/test*/test_acc_*.npy` file and plot.
+
+For the 2 layer implementation, simply add another 100 to the `hidden_sizes` variable in the training file, and repeat the steps.
