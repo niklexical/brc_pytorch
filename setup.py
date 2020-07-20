@@ -9,7 +9,7 @@ else:
 
 setup(
     name='brc_pytorch',
-    version='0.1',
+    version='0.1.1',
     license='MIT',
     description=('Pytorch Implementation of BRC.'),
     long_description=long_description,
