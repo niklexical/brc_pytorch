@@ -1,3 +1,4 @@
+[![PyPI version](https://badge.fury.io/py/brc-pytorch.svg)](https://badge.fury.io/py/brc-pytorch)
 [![Build
 Status](https://travis-ci.com/niklexical/brc_pytorch.svg?branch=master)](https://travis-ci.com/niklexical/brc_pytorch)
 [![License:
