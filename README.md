@@ -51,7 +51,7 @@ Copy-First-Input task (Benchmark 1 from the original paper). Moreover, it is wel
 that standard RNNs have difficulties in *discrete counting*, especially for
 longer sequences (see
 [NeurIPS 2015 paper](http://papers.nips.cc/paper/5857-inferring-algorithmic-patterns-with-stack-augmented-recurrent-nets)).
-Secondly, we here identify the task of **Binary Addiiton** as another
+To this end, we here identify **Binary Addition** as another
 task for which the nBRC is superior to LSTM & GRU which begs implications for a
 set of tasks involving more explicit memorization. For both tasks, the
 performances of BRC and nBRC are compared with that of the LSTM and GRU cells. 
