@@ -7,7 +7,7 @@ MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.or
 # brc_pytorch
 Pytorch implementation of bistable recurrent cell with baseline comparisons.
 
-This repository contains the Pytorch implementation of the paper ["A bio-inspired bistable recurrent cell allows for long-lasting memory".](https://arxiv.org/abs/2006.05252)
+This repository contains the Pytorch implementation of the paper ["A bio-inspired bistable recurrent cell allows for long-lasting memory"](https://arxiv.org/abs/2006.05252). The original `tensorflow` implementation by the author Nicolas Vecoven can be found [here](https://github.com/nvecoven/BRC).
 
 ## Package setup
 
