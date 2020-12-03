@@ -1,6 +1,7 @@
 [![PyPI version](https://badge.fury.io/py/brc-pytorch.svg)](https://badge.fury.io/py/brc-pytorch)
 [![Build
 Status](https://travis-ci.com/niklexical/brc_pytorch.svg?branch=master)](https://travis-ci.com/niklexical/brc_pytorch)
+[![codecov](https://codecov.io/gh/niklexical/brc_pytorch/branch/master/graph/badge.svg?token=UQ5O5CP8KD)](https://codecov.io/gh/niklexical/brc_pytorch)
 [![License:
 MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 

@@ -14,8 +14,11 @@ before_script:
 
 script:
   - python -c "import brc_pytorch"
-  - pytest
+  - coverage run -m pytest
 
+after_success:
+  - bash <(curl -s https://codecov.io/bash)
+  
 deploy:
   provider: script
   skip_cleanup: true
