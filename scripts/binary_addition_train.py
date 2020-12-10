@@ -104,23 +104,31 @@ def main(model_path: str, results_path: str) -> None:
         plot_accuracy_valid = []
 
         input_size = 2
-        hidden_sizes = [input_size, 100]
+        hidden_size = 100
+        num_layers = 1
+        bidirectional = False
 
-        recurrent_layers = [
-            cell(hidden_sizes[i], hidden_sizes[i + 1])
-            for i in range(len(hidden_sizes) - 1)
-        ]
+        num_directions = 2 if bidirectional else 1
+        inner_input_dimensions = num_directions * hidden_size
+
+        recurrent_layers = [cell(input_size, hidden_size)]
+
+        for _ in range(num_layers - 1):
+            recurrent_layers.append(cell(inner_input_dimensions, hidden_size))
 
         rnn = MultiLayerBase(
             name,
             recurrent_layers,
-            hidden_sizes[1:],
-            device,
-            return_sequences=True
+            hidden_size,
+            batch_first=True,
+            bidirectional=bidirectional,
+            return_sequences=True,
+            device=device
         )
 
         model = nn.Sequential(
-            rnn, SelectItem(0), nn.Linear(hidden_sizes[-1], 1), nn.Sigmoid()
+            rnn, SelectItem(0), nn.Linear(num_directions * hidden_size, 1),
+            nn.Sigmoid()
         ).to(device)
 
         loss_fn = nn.BCELoss()
