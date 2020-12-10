@@ -10,29 +10,37 @@ class MultiLayerBase(nn.Module):
     def __init__(
         self,
         mode: str,
-        cells: List,
+        cells: List[torch.nn.Module],
         hidden_size: int,
         batch_first: bool = True,
         bidirectional: bool = False,
+        return_sequences: bool = False,
         device: torch.device = torch.
         device('cuda' if torch.cuda.is_available() else 'cpu'),
-        return_sequences: bool = False,
     ) -> None:
         """Constructor.
 
         Args:
             mode (string): Type of cell to be used in the recurrent network.
                 Options are: ['GRU', 'LSTM', 'RNN', 'BRC', 'nBRC'].
-            cell (List): List of cells to be used in each network layer.
+            cell (List[torch.nn.Module]): List of cells to be used in each
+            network layer. For example, torch.nn.GRUCell module initialised with
+            the necessary arguments repeated num_layers times, i.e,
+            [torch.nn.GRUCell(8,16),torch.nn.GRUCell(16,16)] for a 2 layered
+            network with input_size = 8 and hidden_size = 16.
+            NOTE: For bidirectional=True, remember to double the input_size for
+            cells of layer 2 onwards, i.e, borrowing from the example above,
+            [torch.nn.GRUCell(8,16),torch.nn.GRUCell(16*2,16)].
             hidden_size (int): Size of the hidden state.
             batch_first (bool): If True, then the input and output tensors are
                 provided as (batch, seq_len, input_size). Default: False.
             bidirectional (bool): If True, becomes a bidirectional network, i.e,
                 input is fed into 2 independent recurrent networks in the forward
-                and backward direction. Default: False. 
-            device (str): Whether to run model on GPU or CPU. Defaults to CPU.
+                and backward direction. Default: False.
             return_sequences (bool): Return the hidden states for all
                 time steps. Defaults to False.
+            device (str): Whether to run model on GPU or CPU. Defaults to 'cuda',
+            if available.
         """
         super().__init__()
 
