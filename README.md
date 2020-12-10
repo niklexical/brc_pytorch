@@ -10,6 +10,7 @@ Pytorch implementation of bistable recurrent cell with baseline comparisons.
 
 This repository contains the Pytorch implementation of the paper ["A bio-inspired bistable recurrent cell allows for long-lasting memory"](https://arxiv.org/abs/2006.05252). The original `tensorflow` implementation by the author Nicolas Vecoven can be found [here](https://github.com/nvecoven/BRC).
 
+Another important feature of this repository is the implementation of a base class that returns a recurrent neural network for a given recurrent cell. Based on the hyperparameters provided, the network can have multiple layers, be bidirectional and the input can either have batch first or not. The outputs from the network mimic that returned by GRU/LSTM networks developed by PyTorch, with an additional option of returning only the hidden states from the last layer and last time step.
 ## Package setup
 
 `brc_pytorch` is `pypi` installable:
@@ -30,20 +31,35 @@ pip install -e .
 from brc_pytorch.layers import BistableRecurrentCell, NeuromodulatedBistableRecurrentCell
 from brc_pytorch.layers import MultiLayerBase
 
+# Create a 3-layer nBRC (behaves like a nn.GRU)
+
 input_size = 32
-hidden_size = 16 
+hidden_size = 16
+num_layers = 3
+bidirectional = True
+batch_first = True
+return_sequences = False
+
+num_directions = 2 if bidirectional else 1
 
 # Behaves like a nn.GRUCell
-brc = BistableRecurrentCell(input_size, hidden_size)
 nbrc = NeuromodulatedBistableRecurrentCell(input_size, hidden_size)
 
-# Create a 3-layer nBRC (behaves like a nn.GRU)
-sizes = [input_size, 16, 16]
-nbrc_cells = [NeuromodulatedBistableRecurrentCell(sizes[i], sizes[i + 1]) for i in range(len(sizes) - 1)]
-three_layer_nbrc = MultiLayerBase('nBRC', nbrc_cells, sizes[1:])
+# Append cells for subsequent layers keeping in mind
+for _ in range(num_layers - 1):
+        nbrc.append(
+            NeuromodulatedBistableRecurrentCell(inner_input_dimensions, hidden_size)
+        )
+
+three_layer_nbrc = rnn = MultiLayerBase(
+        "nBRC",
+        nbrc,
+        hidden_size,
+        batch_first,
+        bidirectional,
+        return_sequences,
+    )
 ```
-
-
 
 
 ## Validation studies
