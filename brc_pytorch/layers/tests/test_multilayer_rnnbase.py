@@ -218,7 +218,7 @@ def test_multilayer_rnn(
     optimiser_model = torch.optim.Adam(model.parameters())
     optimiser_torch = torch.optim.Adam(model_torch.parameters())
 
-    epochs = 30
+    epochs = 40
 
     training_loader, inputs_test, outputs_test = generate_dataset
     test_x = torch.from_numpy(inputs_test)
@@ -358,7 +358,7 @@ def test_multilayer_lstm(
     optimiser_model = torch.optim.Adam(model.parameters())
     optimiser_torch = torch.optim.Adam(model_torch.parameters())
 
-    epochs = 30
+    epochs = 40
 
     training_loader, inputs_test, outputs_test = generate_dataset
     test_x = torch.from_numpy(inputs_test)
