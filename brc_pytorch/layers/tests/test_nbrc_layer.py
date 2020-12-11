@@ -78,21 +78,41 @@ def test_nbrc_cell():
     assert hidden_state.size() == torch.Size([batch_size, hidden_size])
 
 
-def test_grad_flow(generate_dataset):
+@pytest.mark.parametrize("batch_first", [True, False])
+@pytest.mark.parametrize("bidirectional", [True, False])
+@pytest.mark.parametrize("num_layers", [1, 2])
+def test_grad_flow(generate_dataset, batch_first, bidirectional, num_layers):
 
     input_size = 1
-    hidden_sizes = [input_size, 100, 100]
+    hidden_size = 100
+
+    num_directions = 2 if bidirectional else 1
 
     recurrent_layers = [
-        NeuromodulatedBistableRecurrentCell(
-            hidden_sizes[i], hidden_sizes[i + 1]
-        ) for i in range(len(hidden_sizes) - 1)
+        NeuromodulatedBistableRecurrentCell(input_size, hidden_size)
     ]
 
-    rnn = MultiLayerBase('nBRC', recurrent_layers, hidden_sizes[1:])
+    inner_input_dimensions = num_directions * hidden_size
 
-    model = nn.Sequential(rnn, nn.Linear(hidden_sizes[2], 1))
+    for _ in range(num_layers - 1):
+        recurrent_layers.append(
+            NeuromodulatedBistableRecurrentCell(
+                inner_input_dimensions, hidden_size
+            )
+        )
 
+    rnn = MultiLayerBase(
+        "nBRC",
+        recurrent_layers,
+        hidden_size,
+        batch_first=batch_first,
+        bidirectional=bidirectional,
+        return_sequences=False,
+    )
+
+    fc = nn.Linear(num_directions * hidden_size, 1)
+
+    model = nn.ModuleList([rnn, fc])
     loss_fn_model = nn.MSELoss()
 
     optimiser_model = torch.optim.Adam(model.parameters())
@@ -106,9 +126,30 @@ def test_grad_flow(generate_dataset):
         model.train()
 
         for idx, (x_batch, y_batch) in enumerate(training_loader):
+            # data generated always has batch first.
+            batch_size = x_batch.size(0)
 
-            x_batch, y_batch = x_batch, y_batch
-            pred_train = model(x_batch)
+            if batch_first is False:
+                # permuting data so that it follow batch_first = False scheme
+                x_batch = x_batch.permute(1, 0, 2)
+
+            pred_train = model[0](x_batch)
+
+            # since output is (num_directions,batch,hidden_size), we first
+            # permute it to get (batch,num_directions,hidden_size) and then
+            # reshape it to (batch, num_directions * hidden_size) so it can be
+            # fed into the FC layer
+
+            pred_train = pred_train.permute(1, 0, 2)
+
+            assert pred_train.size() == torch.Size(
+                [batch_size, num_directions, hidden_size]
+            )
+
+            pred_train = pred_train.reshape(
+                batch_size, num_directions * hidden_size
+            )
+            pred_train = model[1](pred_train)
 
             train_loss = loss_fn_model(pred_train, y_batch)
 
@@ -124,8 +165,14 @@ def test_grad_flow(generate_dataset):
 
         numweights_model.append(torch.numel(p))
 
-    assert len(param_groups_model) == 16
-    assert sum(numweights_model) == 3 * input_size * hidden_sizes[
-        1] + 2 * hidden_sizes[1]**2 + 2 * hidden_sizes[1] + 3 * hidden_sizes[
-            1] * hidden_sizes[2] + 2 * hidden_sizes[2]**2 + 2 * hidden_sizes[
-                2] + hidden_sizes[2] + 1
+    # add 2 to account for linear layer parameter groups
+    assert len(param_groups_model) == num_layers * 7 * num_directions + 2
+
+    assert sum(numweights_model) == (
+        (3 * input_size * hidden_size + 2 * hidden_size**2 + 2 * hidden_size) *
+        num_directions + (
+            3 * hidden_size * num_directions * hidden_size +
+            2 * hidden_size**2 + 2 * hidden_size
+        ) * (num_layers - 1) * num_directions +
+        (num_directions * hidden_size) + 1
+    ), f'{numweights_model}'

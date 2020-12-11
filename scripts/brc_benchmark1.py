@@ -3,7 +3,7 @@ import logging
 import os
 import sys
 from typing import Tuple
-
+from operator import itemgetter
 import matplotlib.pyplot as plt
 import numpy as np
 import seaborn as sns
@@ -13,9 +13,15 @@ from torch.utils.data import DataLoader
 
 from brc_pytorch.datasets import BRCDataset
 from brc_pytorch.layers import (
-    BistableRecurrentCell, MultiLayerBase, NeuromodulatedBistableRecurrentCell,
-    SelectItem
+    BistableRecurrentCell, MultiLayerBase, NeuromodulatedBistableRecurrentCell
 )
+
+
+def permute_reshape(output, batch, num_directions, hidden_size):
+    output = output.permute(1, 0, 2)
+    assert output.size() == torch.Size([batch, num_directions, hidden_size])
+    output = output.reshape(batch, num_directions * hidden_size)
+    return output
 
 
 def generate_sample(n: int) -> Tuple:
@@ -138,24 +144,36 @@ def main(model_path: str, results_path: str) -> None:
             logger.info("---------------------")
 
             input_size = inputs_train.shape[2]
-            hidden_sizes = [input_size, 100, 100]
+            hidden_size = 100
+            num_layers = 2
+            bidirectional = False
 
-            recurrent_layers = [
-                cell(hidden_sizes[i], hidden_sizes[i + 1])
-                for i in range(len(hidden_sizes) - 1)
-            ]
+            num_directions = 2 if bidirectional else 1
+            inner_input_dimensions = num_directions * hidden_size
+
+            recurrent_layers = [cell(input_size, hidden_size)]
+
+            for _ in range(num_layers - 1):
+                recurrent_layers.append(
+                    cell(inner_input_dimensions, hidden_size)
+                )
 
             rnn = MultiLayerBase(
-                name, recurrent_layers, hidden_sizes[1:], device
+                name,
+                recurrent_layers,
+                hidden_size,
+                batch_first=True,
+                bidirectional=bidirectional,
+                return_sequences=False,
+                device=device
             )
 
-            if name == "LSTM":
-                model = nn.Sequential(
-                    rnn, SelectItem(0), nn.Linear(hidden_sizes[2], 1)
-                ).to(device)
-            else:
-                model = nn.Sequential(rnn, nn.Linear(hidden_sizes[2],
-                                                     1)).to(device)
+            fc = nn.Linear(hidden_size * num_directions, 1)
+
+            get_hidden = itemgetter(0)
+
+            model = nn.ModuleDict({'rnn': rnn, 'fc': fc}).to(device)
+
             loss_fn = nn.MSELoss()
             optimiser = torch.optim.Adam(model.parameters())
 
@@ -179,7 +197,18 @@ def main(model_path: str, results_path: str) -> None:
                         x_batch, y_batch = x_batch.to(device
                                                       ), y_batch.to(device)
 
-                        pred_train = model(x_batch)
+                        pred_train = model['rnn'](x_batch)
+
+                        if name == "LSTM":
+                            pred_train = get_hidden(pred_train)
+
+                        pred_train = permute_reshape(
+                            pred_train, x_batch.size(0), num_directions,
+                            hidden_size
+                        )
+
+                        pred_train = model['fc'](pred_train)
+
                         train_loss = loss_fn(pred_train, y_batch)
                         optimiser.zero_grad()
                         train_loss.backward()
@@ -205,7 +234,19 @@ def main(model_path: str, results_path: str) -> None:
                     for idx, (x_test, y_test) in enumerate(test_loader):
 
                         x_test, y_test = x_test.to(device), y_test.to(device)
-                        pred_test = model(x_test)
+                        # pred_test = model(x_test)
+
+                        pred_test = model['rnn'](x_test)
+
+                        if name == "LSTM":
+                            pred_test = get_hidden(pred_test)
+
+                        pred_train = permute_reshape(
+                            pred_test, x_test.size(0), num_directions,
+                            hidden_size
+                        )
+
+                        pred_test = model['fc'](pred_test)
 
                         test_loss = loss_fn(pred_test, y_test)
                         test_allepochs_losses.append(

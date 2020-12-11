@@ -6,22 +6,7 @@ import torch.nn as nn
 from torch.utils.data import DataLoader
 
 from brc_pytorch.datasets import BRCDataset
-from brc_pytorch.layers import MultiLayerBase
-
-
-class SelectItem(nn.Module):
-
-    def __init__(self, item_index, model='custom'):
-        super(SelectItem, self).__init__()
-        self._name = 'selectitem'
-        self.item_index = item_index
-        self.model = model
-
-    def forward(self, inputs):
-        if self.model == 'torch':
-            return inputs[self.item_index][:, -1, :]
-        else:
-            return inputs[self.item_index]
+from brc_pytorch.layers import MultiLayerBase, SelectItem
 
 
 @pytest.fixture
@@ -66,24 +51,166 @@ def generate_dataset(generate_sample):
     return training_loader, inputs_test, outputs_test
 
 
-def test_multilayer_rnn(generate_dataset):
+def test_rnn_dimensions(generate_dataset):
+    input_size = 2
+    hidden_size = 10
+    batch_first = [True, False]
+    bidirectional = [True, False]
+    num_layers = [1, 2, 10]
+    test_x = torch.randn(16, 5, 2)
+
+    for batch in batch_first:
+        if batch is False:
+            test_x = test_x.permute(1, 0, 2)
+        for bi in bidirectional:
+            num_directions = 2 if bi else 1
+            for layers in num_layers:
+
+                recurrent_layers = [nn.GRUCell(input_size, hidden_size)]
+
+                inner_input_dimensions = num_directions * hidden_size
+
+                for _ in range(layers - 1):
+                    recurrent_layers.append(
+                        nn.GRUCell(inner_input_dimensions, hidden_size)
+                    )
+
+                assert len(recurrent_layers) == layers
+
+                rnn = MultiLayerBase(
+                    "GRU",
+                    recurrent_layers,
+                    hidden_size,
+                    batch_first=batch,
+                    bidirectional=bi,
+                    return_sequences=True,
+                )
+
+                rnn_torch = nn.GRU(
+                    input_size,
+                    hidden_size,
+                    num_layers=layers,
+                    batch_first=batch,
+                    bidirectional=bi
+                )
+
+                output_rnn = rnn(test_x)
+                output_torch = rnn_torch(test_x)
+
+                assert isinstance(output_rnn, tuple)
+
+                assert len(output_rnn) == len(output_torch)
+
+                for i in range(len(output_rnn)):
+                    assert output_rnn[i].size() == output_torch[i].size()
+
+
+def test_lstm_dimensions(generate_dataset):
+    input_size = 2
+    hidden_size = 10
+    batch_first = [True, False]
+    bidirectional = [True, False]
+    num_layers = [1, 2, 10]
+    test_x = torch.randn(16, 5, 2)
+
+    for batch in batch_first:
+        if batch is False:
+            test_x = test_x.permute(1, 0, 2)
+        for bi in bidirectional:
+            num_directions = 2 if bi else 1
+            for layers in num_layers:
+
+                recurrent_layers = [nn.LSTMCell(input_size, hidden_size)]
+
+                inner_input_dimensions = num_directions * hidden_size
+
+                for _ in range(layers - 1):
+                    recurrent_layers.append(
+                        nn.LSTMCell(inner_input_dimensions, hidden_size)
+                    )
+
+                assert len(recurrent_layers) == layers
+
+                rnn = MultiLayerBase(
+                    "LSTM",
+                    recurrent_layers,
+                    hidden_size,
+                    batch_first=batch,
+                    bidirectional=bi,
+                    return_sequences=True,
+                )
+
+                rnn_torch = nn.LSTM(
+                    input_size,
+                    hidden_size,
+                    num_layers=layers,
+                    batch_first=batch,
+                    bidirectional=bi
+                )
+
+                outputs_rnn = rnn(test_x)
+                outputs_torch = rnn_torch(test_x)
+
+                assert isinstance(outputs_rnn, tuple)
+                assert len(outputs_rnn) == len(outputs_torch)
+
+                out_rnn, (h_rnn, c_rnn) = outputs_rnn
+                out_torch, (h_torch, c_torch) = outputs_torch
+
+                assert out_rnn.size() == out_torch.size()
+
+                assert h_rnn.size() == h_torch.size()
+                assert c_rnn.size() == c_torch.size()
+
+
+@pytest.mark.parametrize("batch_first", [True, False])
+@pytest.mark.parametrize("bidirectional", [True, False])
+@pytest.mark.parametrize("num_layers", [1, 2])
+def test_multilayer_rnn(
+    generate_dataset, batch_first, bidirectional, num_layers
+):
     """Tests multilayer functionality for cells that output hidden state only."""
 
     input_size = 1
-    hidden_sizes = [input_size, 100, 100]
+    hidden_size = 10
 
-    recurrent_layers = [
-        nn.GRUCell(hidden_sizes[i], hidden_sizes[i + 1])
-        for i in range(len(hidden_sizes) - 1)
-    ]
+    num_directions = 2 if bidirectional else 1
 
-    rnn = MultiLayerBase('GRU', recurrent_layers, hidden_sizes[1:])
+    recurrent_layers = [nn.GRUCell(input_size, hidden_size)]
 
-    model = nn.Sequential(rnn, nn.Linear(hidden_sizes[2], 1))
+    inner_input_dimensions = num_directions * hidden_size
+
+    for _ in range(num_layers - 1):
+        recurrent_layers.append(
+            nn.GRUCell(inner_input_dimensions, hidden_size)
+        )
+
+    assert len(recurrent_layers) == num_layers
+
+    rnn = MultiLayerBase(
+        "GRU",
+        recurrent_layers,
+        hidden_size,
+        batch_first=batch_first,
+        bidirectional=bidirectional,
+        return_sequences=True,
+    )
+
+    model = nn.Sequential(
+        rnn, SelectItem(0, -1, batch_first),
+        nn.Linear(num_directions * hidden_size, 1)
+    )
 
     model_torch = nn.Sequential(
-        nn.GRU(input_size, 100, 2, batch_first=True), SelectItem(0, 'torch'),
-        nn.Linear(hidden_sizes[2], 1)
+        nn.GRU(
+            input_size,
+            hidden_size,
+            num_layers=num_layers,
+            batch_first=batch_first,
+            bidirectional=bidirectional
+        ),
+        SelectItem(0, -1, batch_first),
+        nn.Linear(num_directions * hidden_size, 1),
     )
 
     loss_fn_model = nn.MSELoss()
@@ -91,10 +218,13 @@ def test_multilayer_rnn(generate_dataset):
     optimiser_model = torch.optim.Adam(model.parameters())
     optimiser_torch = torch.optim.Adam(model_torch.parameters())
 
-    epochs = 20
+    epochs = 40
 
     training_loader, inputs_test, outputs_test = generate_dataset
     test_x = torch.from_numpy(inputs_test)
+    if batch_first is False:
+        # data always has batch first, so permute to make len first
+        test_x = test_x.permute(1, 0, 2)
     test_y = torch.from_numpy(outputs_test)
 
     for e in range(epochs):
@@ -104,11 +234,25 @@ def test_multilayer_rnn(generate_dataset):
 
         for idx, (x_batch, y_batch) in enumerate(training_loader):
 
-            x_batch, y_batch = x_batch, y_batch
+            if batch_first is False:
+                # data always has batch first, so permute to make len first
+                x_batch = x_batch.permute(1, 0, 2)
+
             pred_train = model(x_batch)
             pred_train_torch = model_torch(x_batch)
-            train_loss = loss_fn_model(pred_train, y_batch)
-            train_loss_torch = loss_fn_torch(pred_train_torch, y_batch)
+
+            assert pred_train.size() == pred_train_torch.size()
+
+            if batch_first is False:
+
+                # permute to make batch first before loss calc
+                pred_train = pred_train.permute(1, 0, 2)
+                pred_train_torch = pred_train_torch.permute(1, 0, 2)
+
+            train_loss = loss_fn_model(pred_train.squeeze(1), y_batch)
+            train_loss_torch = loss_fn_torch(
+                pred_train_torch.squeeze(1), y_batch
+            )
 
             optimiser_model.zero_grad()
             train_loss.backward()
@@ -118,13 +262,24 @@ def test_multilayer_rnn(generate_dataset):
             train_loss_torch.backward()
             optimiser_torch.step()
 
+    if batch_first:
+        assert test_x.size() == torch.Size([100, 10, 1])
+    else:
+        assert test_x.size() == torch.Size([10, 100, 1])
+
     model.eval()
     my_test_pred = model(test_x)
-    my_test_loss = loss_fn_model(my_test_pred, test_y)
 
     model_torch.eval()
     torch_test_pred = model_torch(test_x)
-    torch_test_loss = loss_fn_torch(torch_test_pred, test_y)
+
+    if batch_first is False:
+        my_test_pred = my_test_pred.permute(1, 0, 2)
+        torch_test_pred = torch_test_pred.permute(1, 0, 2)
+
+    my_test_loss = loss_fn_model(my_test_pred.squeeze(1), test_y)
+
+    torch_test_loss = loss_fn_torch(torch_test_pred.squeeze(1), test_y)
 
     param_groups_model = []
     numweights_model = []
@@ -143,31 +298,59 @@ def test_multilayer_rnn(generate_dataset):
         numweights_torch.append(torch.numel(pt))
 
     assert numweights_model == numweights_torch
-    assert len(param_groups_model) == 10
+    assert len(param_groups_model) == num_layers * 4 * num_directions + 2
     assert len(param_groups_torch) == len(param_groups_model)
-    assert x_batch.size() == torch.Size([100, 10, 1])
+
     assert torch.allclose(train_loss, train_loss_torch)
     assert torch.allclose(my_test_loss, torch_test_loss)
 
 
-def test_multilayer_lstm(generate_dataset):
+@pytest.mark.parametrize("batch_first", [True, False])
+@pytest.mark.parametrize("bidirectional", [True, False])
+@pytest.mark.parametrize("num_layers", [1, 2])
+def test_multilayer_lstm(
+    generate_dataset, batch_first, bidirectional, num_layers
+):
     """Tests multilayer functionality for cells that output hidden and cell state."""
 
     input_size = 1
-    hidden_sizes = [input_size, 100, 100]
+    hidden_size = 10
 
-    recurrent_layers = [
-        nn.LSTMCell(hidden_sizes[i], hidden_sizes[i + 1])
-        for i in range(len(hidden_sizes) - 1)
-    ]
+    num_directions = 2 if bidirectional else 1
 
-    rnn = MultiLayerBase('LSTM', recurrent_layers, hidden_sizes[1:])
+    recurrent_layers = [nn.LSTMCell(input_size, hidden_size)]
 
-    model = nn.Sequential(rnn, SelectItem(0), nn.Linear(hidden_sizes[2], 1))
+    inner_input_dimensions = num_directions * hidden_size
+
+    for _ in range(num_layers - 1):
+        recurrent_layers.append(
+            nn.LSTMCell(inner_input_dimensions, hidden_size)
+        )
+
+    rnn = MultiLayerBase(
+        "LSTM",
+        recurrent_layers,
+        hidden_size,
+        batch_first=batch_first,
+        bidirectional=bidirectional,
+        return_sequences=True,
+    )
+
+    model = nn.Sequential(
+        rnn, SelectItem(0, -1, batch_first),
+        nn.Linear(num_directions * hidden_size, 1)
+    )
 
     model_torch = nn.Sequential(
-        nn.LSTM(input_size, 100, 2, batch_first=True), SelectItem(0, 'torch'),
-        nn.Linear(hidden_sizes[2], 1)
+        nn.LSTM(
+            input_size,
+            hidden_size,
+            num_layers=num_layers,
+            batch_first=batch_first,
+            bidirectional=bidirectional
+        ),
+        SelectItem(0, -1, batch_first),
+        nn.Linear(num_directions * hidden_size, 1),
     )
 
     loss_fn_model = nn.MSELoss()
@@ -175,10 +358,13 @@ def test_multilayer_lstm(generate_dataset):
     optimiser_model = torch.optim.Adam(model.parameters())
     optimiser_torch = torch.optim.Adam(model_torch.parameters())
 
-    epochs = 20
+    epochs = 40
 
     training_loader, inputs_test, outputs_test = generate_dataset
     test_x = torch.from_numpy(inputs_test)
+    if batch_first is False:
+        # data always has batch first, so permute to make len first
+        test_x = test_x.permute(1, 0, 2)
     test_y = torch.from_numpy(outputs_test)
 
     for e in range(epochs):
@@ -188,11 +374,21 @@ def test_multilayer_lstm(generate_dataset):
 
         for idx, (x_batch, y_batch) in enumerate(training_loader):
 
-            x_batch, y_batch = x_batch, y_batch
+            if batch_first is False:
+                # data comes out with batch first, so permute to make len first
+                x_batch = x_batch.permute(1, 0, 2)
+
             pred_train = model(x_batch)
             pred_train_torch = model_torch(x_batch)
-            train_loss = loss_fn_model(pred_train, y_batch)
-            train_loss_torch = loss_fn_torch(pred_train_torch, y_batch)
+
+            if batch_first is False:
+                pred_train = pred_train.permute(1, 0, 2)
+                pred_train_torch = pred_train_torch.permute(1, 0, 2)
+
+            train_loss = loss_fn_model(pred_train.squeeze(1), y_batch)
+            train_loss_torch = loss_fn_torch(
+                pred_train_torch.squeeze(1), y_batch
+            )
 
             optimiser_model.zero_grad()
             train_loss.backward()
@@ -204,11 +400,17 @@ def test_multilayer_lstm(generate_dataset):
 
     model.eval()
     my_test_pred = model(test_x)
-    my_test_loss = loss_fn_model(my_test_pred, test_y)
 
     model_torch.eval()
     torch_test_pred = model_torch(test_x)
-    torch_test_loss = loss_fn_torch(torch_test_pred, test_y)
+
+    if batch_first is False:
+        my_test_pred = my_test_pred.permute(1, 0, 2)
+        torch_test_pred = torch_test_pred.permute(1, 0, 2)
+
+    my_test_loss = loss_fn_model(my_test_pred.squeeze(1), test_y)
+
+    torch_test_loss = loss_fn_torch(torch_test_pred.squeeze(1), test_y)
 
     param_groups_model = []
     numweights_model = []
@@ -227,8 +429,8 @@ def test_multilayer_lstm(generate_dataset):
         numweights_torch.append(torch.numel(pt))
 
     assert numweights_model == numweights_torch
-    assert len(param_groups_model) == 10
-    assert len(param_groups_torch) == 10
-    assert x_batch.size() == torch.Size([100, 10, 1])
+    assert len(param_groups_model) == (num_layers * 4 * num_directions + 2)
+    assert len(param_groups_torch) == len(param_groups_model)
+
     assert torch.allclose(train_loss, train_loss_torch)
     assert torch.allclose(my_test_loss, torch_test_loss)
