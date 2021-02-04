@@ -43,7 +43,7 @@ return_sequences = False
 num_directions = 2 if bidirectional else 1
 
 # Behaves like a nn.GRUCell
-nbrc = NeuromodulatedBistableRecurrentCell(input_size, hidden_size)
+nbrc = [NeuromodulatedBistableRecurrentCell(input_size, hidden_size)]
 
 # Append cells for subsequent layers keeping in mind
 for _ in range(num_layers - 1):
