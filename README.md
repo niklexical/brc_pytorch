@@ -41,7 +41,7 @@ batch_first = True
 return_sequences = False
 
 num_directions = 2 if bidirectional else 1
-
+inner_input_dimensions = num_directions * hidden_size
 # Behaves like a nn.GRUCell
 nbrc = [NeuromodulatedBistableRecurrentCell(input_size, hidden_size)]
 
