@@ -11,7 +11,14 @@ Pytorch implementation of bistable recurrent cell with baseline comparisons.
 
 This repository contains the Pytorch implementation of the paper ["A bio-inspired bistable recurrent cell allows for long-lasting memory"](https://arxiv.org/abs/2006.05252). The original `tensorflow` implementation by the author Nicolas Vecoven can be found [here](https://github.com/nvecoven/BRC).
 
-Another important feature of this repository is the implementation of a base class that returns a recurrent neural network for a given recurrent cell. Based on the hyperparameters provided, the network can have multiple layers, be bidirectional and the input can either have batch first or not. The outputs from the network mimic that returned by GRU/LSTM networks developed by PyTorch, with an additional option of returning only the hidden states from the last layer and last time step.
+#### Bonus Feature
+Implementation of a **base class that returns a recurrent neural network for any given recurrent cell**, whether custom-built or the standard PyTorch implementations of the recurrent cells. Based on the hyperparameters provided, the network can:
+1. have multiple layers, 
+2. be bidirectional, and 
+3. process inputs where the *batch size* is the first dimension or not the first dimension. 
+
+The outputs from the network mimic that returned by GRU/LSTM networks developed by PyTorch, with an additional option of returning only the hidden states from the last layer and last time step.
+
 ## Package setup
 
 `brc_pytorch` is `pypi` installable:
@@ -26,7 +33,6 @@ source venv/bin/activate
 pip install -r requirements.txt
 pip install -e .
 ```
-
 ### Usage (example)
 ```py
 from brc_pytorch.layers import BistableRecurrentCell, NeuromodulatedBistableRecurrentCell
@@ -62,8 +68,44 @@ three_layer_nbrc = rnn = MultiLayerBase(
     )
 ```
 
+## Citation
 
-## Validation studies
+If you use **any feature** of the `brc_pytorch` package in your projects, please cite:
+
+```bib
+@inproceedings{10.1145/3534678.3539153,
+  author = {Janakarajan, Nikita and Born, Jannis and Manica, Matteo},
+  title = {A Fully Differentiable Set Autoencoder},
+  year = {2022},
+  isbn = {9781450393850},
+  publisher = {Association for Computing Machinery},
+  address = {New York, NY, USA},
+  url = {https://doi.org/10.1145/3534678.3539153},
+  doi = {10.1145/3534678.3539153},
+  booktitle = {Proceedings of the 28th ACM SIGKDD Conference on Knowledge Discovery and Data Mining},
+  pages = {3061–3071},
+  numpages = {11},
+  keywords = {set matching network, multi-modality, autoencoders, sets},
+  location = {Washington DC, USA},
+  series = {KDD '22}
+}
+```
+If you use the implementation of BRC and nBRC, please also cite:
+
+```bib
+@article{vecoven2021bio,
+  title={A bio-inspired bistable recurrent cell allows for long-lasting memory},
+  author={Vecoven, Nicolas and Ernst, Damien and Drion, Guillaume},
+  journal={Plos one},
+  volume={16},
+  number={6},
+  pages={e0252676},
+  year={2021},
+  publisher={Public Library of Science San Francisco, CA USA}
+}
+```
+
+## Additional Validation studies
 
 First, the implementations of both the BRC and nBRC are validated on the
 Copy-First-Input task (Benchmark 1 from the original paper). Moreover, it is well known
