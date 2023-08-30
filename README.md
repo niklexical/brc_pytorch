@@ -1,6 +1,6 @@
 [![PyPI version](https://badge.fury.io/py/brc-pytorch.svg)](https://badge.fury.io/py/brc-pytorch)
-[![Downloads](https://pepy.tech/badge/brc-pytorch)](https://pepy.tech/project/brc-pytorch)
-[![Downloads](https://pepy.tech/badge/brc-pytorch/month)](https://pepy.tech/project/brc-pytorch)
+[![Downloads](https://static.pepy.tech/badge/brc-pytorch)](https://pepy.tech/project/brc-pytorch)
+[![Downloads](https://static.pepy.tech/badge/brc-pytorch/month)](https://pepy.tech/project/brc-pytorch)
 [![Build Status](https://github.com/niklexical/brc_pytorch/actions/workflows/build.yml/badge.svg)](https://github.com/niklexical/brc_pytorch/actions/workflows/build.yml)
 [![codecov](https://codecov.io/gh/niklexical/brc_pytorch/branch/master/graph/badge.svg?token=UQ5O5CP8KD)](https://codecov.io/gh/niklexical/brc_pytorch)
 [![License:
